@@ -1,0 +1,4 @@
+GET         /                       controllers.Dashboard.index
+GET         /q/histogram/:event     controllers.Query.index(event: String)
+
+GET         /assets/*file       controllers.Assets.at(path="/public", file)

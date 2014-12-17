@@ -1,0 +1,65 @@
+@(test: String)
+
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>@test</title>
+</head>
+<body>
+
+    <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+    <label>Authentication<input type="checkbox" class="add" value="authentication" /></label>
+    <label>Search<input type="checkbox" class="add" value="search" /></label>
+    <label>Messages<input type="checkbox" class="add" value="messages" /></label>
+    <label>Favourites<input type="checkbox" class="add" value="favourites" /></label>
+
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js'></script>
+    <script src="http://code.highcharts.com/stock/highstock.js"></script>
+
+    <script>
+        var series;
+
+        function jsonGet(tag, callback) {
+            return $.getJSON('/q/histogram/'+tag, function (data) {
+                callback(data);
+            })
+        }
+
+        $(function () {
+            $(".add").change(function() {
+                var tag = this.value;
+                var chart = $('#container').highcharts();
+
+                if (!this.checked) {
+                    return chart.get(tag).remove();
+                };
+
+                $.when(
+                    jsonGet(tag, function(data) {
+                        series.push(data[0]);
+                    })
+                ).then(function() {
+                    chart.addSeries(series.filter(function(i) { return i.name == tag } )[0]);
+                })
+            })
+
+
+            $.when(
+                jsonGet("profile.views", function(data) {
+                    series = data;
+                })
+            ).then(function() {
+                $('#container').highcharts('StockChart', {
+                    navigator : {
+                        enabled : false
+                    },
+
+                    series : series
+                });
+            })
+        });
+    </script>
+</body>
+</html>
