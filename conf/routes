@@ -1,4 +1,6 @@
-GET         /                       controllers.Dashboard.index
-GET         /q/histogram/:event     controllers.Query.index(event: String)
+GET         /s                      controllers.Dashboard.scatter
+GET         /h                      controllers.Dashboard.histogram
+GET         /a/histogram/:event     controllers.Aggregation.histogram(event: String)
+GET         /q/scatter              controllers.Query.scatter
 
 GET         /assets/*file       controllers.Assets.at(path="/public", file)

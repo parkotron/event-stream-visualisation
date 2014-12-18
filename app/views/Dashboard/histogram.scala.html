@@ -22,7 +22,7 @@
         var series;
 
         function jsonGet(tag, callback) {
-            return $.getJSON('/q/histogram/'+tag, function (data) {
+            return $.getJSON('/a/histogram/'+tag, function (data) {
                 callback(data);
             })
         }
