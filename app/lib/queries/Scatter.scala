@@ -46,7 +46,7 @@ object Scatter {
 
   def searchAges: Future[SearchResponse] = {
     ESClient.client.execute {
-      search in "events/enriched" query "unstruct_event_1.eventSource:search" limit 20000
+      search in "events/enriched" query "unstruct_event_1.eventSource:search" limit 10000
     }
   }
 }

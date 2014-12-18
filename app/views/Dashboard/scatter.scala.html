@@ -16,6 +16,10 @@
 <script>
         var series;
 
+        Highcharts.setOptions({
+            colors: ['#a4c8d6', '#d6a4bb']
+        })
+
         function jsonGet(callback) {
             return $.getJSON('/q/scatter', function (data) {
                 callback(data);
@@ -33,12 +37,17 @@
                         type: 'scatter'
                     },
 
+                    title: {
+                        text: 'Average age searched for by gender'
+                    },
+
                     xAxis: {
                         title: {
                             enabled: true,
                             text: 'Member age'
                         }
                     },
+
                     yAxis: {
                         title: {
                             text: 'Avg searched for age'
