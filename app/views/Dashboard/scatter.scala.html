@@ -1,0 +1,78 @@
+@(test: String)
+
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>@test</title>
+</head>
+<body>
+
+<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+<script src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js'></script>
+<script src="http://code.highcharts.com/stock/highstock.js"></script>
+
+<script>
+        var series;
+
+        function jsonGet(callback) {
+            return $.getJSON('/q/scatter', function (data) {
+                callback(data);
+            })
+        }
+
+        $(function () {
+            $.when(
+                jsonGet(function(data) {
+                    series = data;
+                })
+            ).then(function() {
+                $('#container').highcharts({
+                    chart: {
+                        type: 'scatter'
+                    },
+
+                    xAxis: {
+                        title: {
+                            enabled: true,
+                            text: 'Member age'
+                        }
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Avg searched for age'
+                        }
+                    },
+
+                    plotOptions: {
+                        scatter: {
+                            marker: {
+                                radius: 5,
+                                states: {
+                                    hover: {
+                                        enabled: true,
+                                        lineColor: 'rgb(100,100,100)'
+                                    }
+                                }
+                            },
+                            states: {
+                                hover: {
+                                    marker: {
+                                        enabled: false
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                pointFormat: 'Age: {point.x}<br/>Looked for: {point.y} '
+                            }
+                        }
+                    },
+
+                    series: series
+                });
+            })
+        });
+    </script>
+</body>
+</html>
