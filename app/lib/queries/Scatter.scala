@@ -8,6 +8,12 @@ import play.api.libs.json._
 import scala.concurrent.Future
 import scala.collection.JavaConverters._
 
+object DataSets {
+  def membersInRecentDays(days: Int) = {
+
+  }
+}
+
 object Scatter {
 
   private def doParse(hits:List[SearchHit], tag: String) = {
@@ -15,6 +21,7 @@ object Scatter {
       val source = hit.getSource.asScala
 
       (for {
+        time <- source.get("dvce_tstamp")
         unstruct <- source.get("unstruct_event_1")
         from <- unstruct.asInstanceOf[java.util.Map[String, _]].asScala.get("from")
         rawParams <- unstruct.asInstanceOf[java.util.Map[String, _]].asScala.get("params")
@@ -24,8 +31,7 @@ object Scatter {
         min <- params.get("age-min")
       } yield {
         val range = List[Int](max.asInstanceOf[Int], min.asInstanceOf[Int])
-        val avg: Int = range.sum/range.length
-        JsArray(List(JsNumber(ageF.asInstanceOf[Int]) , JsNumber(avg)))
+        JsArray(List(JsNumber(time.toString.toLong), JsNumber(ageF.asInstanceOf[Int]) , JsNumber(max.asInstanceOf[Int]), JsNumber(min.asInstanceOf[Int])))
       }) getOrElse JsArray()
     }
 
@@ -46,7 +52,7 @@ object Scatter {
 
   def searchAges: Future[SearchResponse] = {
     ESClient.client.execute {
-      search in "events/enriched" query "unstruct_event_1.eventSource:search" limit 10000
+      search in "events/enriched" query "unstruct_event_1.eventSource:search" limit 50
     }
   }
 }

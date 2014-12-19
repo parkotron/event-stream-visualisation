@@ -8,16 +8,19 @@
 </head>
 <body>
 
-<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+<div id="scatter-container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+<div id="average-container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
 
 <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js'></script>
 <script src="http://code.highcharts.com/stock/highstock.js"></script>
+<script src="http://code.highcharts.com/highcharts-more.js"></script>
 
 <script>
         var series;
 
         Highcharts.setOptions({
-            colors: ['#a4c8d6', '#d6a4bb']
+            colors: ['#5481d6', '#d654Af']
         })
 
         function jsonGet(callback) {
@@ -32,7 +35,51 @@
                     series = data;
                 })
             ).then(function() {
-                $('#container').highcharts({
+
+                $('#average-container').highcharts({
+
+                    xAxis: {
+                        type: 'datetime'
+                    },
+
+                    series: function() {
+                        var parsed = series.map(function(ser, idx){
+                            var ranges = [];
+                            var ages = [];
+
+                            ser.data.sort(function(a, b) {
+                                if (a[0] < b[0]) return -1;
+                                if (a[0] > b[0]) return 1;
+                                return 0;
+                            }).map(function(point) {
+                                if (point[0]) {
+                                    ages.push([point[0], point[1]]);
+                                    ranges.push([point[0], point[2], point[3]]);
+                                }
+                            })
+
+                            return [{
+                                series: "Age",
+                                color: Highcharts.getOptions().colors[idx],
+                                data: ages
+                            }, {
+                                series: "Search ranges",
+                                data: ranges,
+                                type: "arearange",
+                                lineWidth: 0,
+                                fillOpacity: 0.3,
+                                color: Highcharts.getOptions().colors[idx],
+                                zIndex: 0
+                            }]
+                        })
+
+                        console.log(parsed);
+
+                        return parsed[1];
+                    }()
+                });
+
+                $('#scatter-container').highcharts({
                     chart: {
                         type: 'scatter'
                     },
@@ -78,7 +125,17 @@
                         }
                     },
 
-                    series: series
+                    series: function() {
+                        var parsed = series.map(function(ser){
+                            return {
+                                'data': ser.data.map(function(point) {
+                                            return [point[1], (point[2] + point[3]) / 2];
+                                        }),
+                                'name': ser.name
+                            }
+                        })
+                        return parsed;
+                    }()
                 });
             })
         });
