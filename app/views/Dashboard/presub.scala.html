@@ -1,20 +1,20 @@
-@main(title = "Histogram") {
+@main(title = "Pre Subscription Events") {
 
-    <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
 
-    <label>Authentication<input type="checkbox" class="add" value="authentication" /></label>
-    <label>Search<input type="checkbox" class="add" value="search" /></label>
-    <label>Messages<input type="checkbox" class="add" value="messages" /></label>
-    <label>Favourites<input type="checkbox" class="add" value="favourites" /></label>
+<label>Authentication<input type="checkbox" class="add" value="authentication" /></label>
+<label>Search<input type="checkbox" class="add" value="search" /></label>
+<label>Messages<input type="checkbox" class="add" value="messages" /></label>
+<label>Favourites<input type="checkbox" class="add" value="favourites" /></label>
 
-    <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js'></script>
-    <script src="http://code.highcharts.com/stock/highstock.js"></script>
+<script src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js'></script>
+<script src="http://code.highcharts.com/highcharts.js"></script>
 
-    <script>
+<script>
         var series;
 
         function jsonGet(tag, callback) {
-            return $.getJSON('/a/histogram/'+tag, function (data) {
+            return $.getJSON('/a/presub/'+tag, function (data) {
                 callback(data);
             })
         }
@@ -43,7 +43,11 @@
                     series = data;
                 })
             ).then(function() {
-                $('#container').highcharts('StockChart', {
+                $('#container').highcharts({
+                    chart: {
+                        type: 'line'
+                    },
+
                     navigator : {
                         enabled : false
                     },

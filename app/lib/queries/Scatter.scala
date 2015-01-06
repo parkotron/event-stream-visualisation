@@ -30,7 +30,6 @@ object Scatter {
         max <- params.get("age-max")
         min <- params.get("age-min")
       } yield {
-        val range = List[Int](max.asInstanceOf[Int], min.asInstanceOf[Int])
         JsArray(List(JsNumber(time.toString.toLong), JsNumber(ageF.asInstanceOf[Int]) , JsNumber(max.asInstanceOf[Int]), JsNumber(min.asInstanceOf[Int])))
       }) getOrElse JsArray()
     }
@@ -52,7 +51,7 @@ object Scatter {
 
   def searchAges: Future[SearchResponse] = {
     ESClient.client.execute {
-      search in "events/enriched" query "unstruct_event_1.eventSource:search" limit 50
+      search in "events/enriched" query "unstruct_event_1.eventSource:search" limit 20000
     }
   }
 }

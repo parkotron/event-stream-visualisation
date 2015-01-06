@@ -1,6 +1,8 @@
 GET         /s                      controllers.Dashboard.scatter
 GET         /h                      controllers.Dashboard.histogram
+GET         /p                      controllers.Dashboard.presub
 GET         /a/histogram/:event     controllers.Aggregation.histogram(event: String)
+GET         /a/presub/:event        controllers.Aggregation.eventFromSubscription(event: String)
 GET         /q/scatter              controllers.Query.scatter
 
 GET         /assets/*file       controllers.Assets.at(path="/public", file)

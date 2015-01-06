@@ -33,4 +33,14 @@ object Histogram {
       }
     }
   }
+
+  def eventsBeforeSubscription: Future[SearchResponse] = {
+    ESClient.client.execute {
+      search in "events/enriched" aggregations {
+        aggregation datehistogram "bySeconds" field "timesincesubscription" minDocCount 5 interval 10000 aggs {
+          aggregation terms "bySource" field "unstruct_event_1.eventSource" size 1
+        }
+      }
+    }
+  }
 }
