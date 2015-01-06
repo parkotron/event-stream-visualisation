@@ -30,7 +30,9 @@
 
                 $('#average-container').highcharts({
 
-
+                    xAxis: {
+                        type: 'datetime'
+                    },
 
                     series: function() {
                         var parsed = series.map(function(ser, idx){
@@ -38,13 +40,13 @@
                             var ages = [];
 
                             ser.data.sort(function(a, b) {
-                                if (a[1] < b[1]) return -1;
-                                if (a[1] > b[1]) return 1;
+                                if (a[0] < b[0]) return -1;
+                                if (a[0] > b[0]) return 1;
                                 return 0;
                             }).map(function(point) {
-                                if (point[1]) {
-                                    ages.push([point[1]]);
-                                    ranges.push([point[2], point[3]]);
+                                if (point[0]) {
+                                    ages.push([point[0], point[1]]);
+                                    ranges.push([point[0], point[2], point[3]]);
                                 }
                             })
 
@@ -63,7 +65,7 @@
                             }]
                         })
 
-                        return [parsed[0][0], parsed[0][1], parsed[1][0], parsed[1][1]];
+                        return parsed[0];
                     }()
                 });
 
