@@ -1,0 +1,98 @@
+@(title: String)
+
+@main(title = title) {
+
+    <h1 class="page-header">@title</h1>
+
+    <div class="row">
+        <div class="col-md-4">
+            <dl>
+                <dd><h2><small>Revenue</small></h2></dd>
+                <dt><h3 id="revenueMetric"></h3></dt>
+
+                <dd><h2><small>WoW</small></h2></dd>
+                <dt><h3 id="revenueWoW"></h3></dt>
+
+                <dd><h2><small>MoM</small></h2></dd>
+                <dt><h3 id="revenueMoM"></h3></dt>
+            </dl>
+        </div>
+        <div class="col-md-8">
+            <div id="revenueHistogram" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+        </div>
+    </div>
+
+    <div class="row">
+
+    </div>
+
+    <script>
+        (function() {
+            var endpoint = '/revenue/histogram';
+            $(function () {
+                $.when(
+                    ESA.Utils.jsonGet(endpoint, "")
+                ).then(function(data) {
+                    $('#revenueHistogram').highcharts('StockChart', {
+                        navigator : {
+                            enabled : false
+                        },
+
+                        rangeSelector : {
+                            enabled : false
+                        },
+
+                        scrollbar : {
+                            enabled : false
+                        },
+
+                        series : [data]
+                    });
+                })
+            });
+        })();
+
+        (function() {
+            var endpoint = '/revenue/metric/1/2';
+            $(function () {
+                $.when(
+                    ESA.Utils.jsonGet(endpoint, "")
+                ).then(function(data) {
+                    $('#revenueMetric').html("&pound;" + data.data);
+                })
+            });
+        })();
+
+        (function() {
+            var endpoint = '/revenue/wow/1/2';
+            $(function () {
+                $.when(
+                    ESA.Utils.jsonGet(endpoint, "")
+                ).then(function(num) {
+
+                    if (num > 0) {
+                        num = "+" + num
+                    }
+
+                    $('#revenueWoW').html(num + "%");
+                })
+            });
+        })();
+
+        (function() {
+            var endpoint = '/revenue/mom/1/2';
+            $(function () {
+                $.when(
+                    ESA.Utils.jsonGet(endpoint, "")
+                ).then(function(num) {
+
+                    if (num > 0) {
+                        num = "+" + num
+                    }
+
+                    $('#revenueMoM').html(num + "%");
+                })
+            });
+        })();
+    </script>
+}
