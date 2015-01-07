@@ -7,7 +7,7 @@
     <div class="row">
         <div class="col-md-2">
             <dl>
-                <dd><h2 class="top-none"><small>Revenue</small></h2></dd>
+                <dd><h2 class="top-none"><small>Revenue to date</small></h2></dd>
                 <dt><h3 id="revenueMetric"></h3></dt>
 
                 <dd><h2><small>WoW</small></h2></dd>
@@ -58,6 +58,10 @@
 
                         scrollbar : {
                             enabled : false
+                        },
+
+                        yAxis: {
+                            min: 0
                         },
 
                         series : [data]
@@ -141,7 +145,7 @@
                         var row = fragment.appendChild( $('<tr/>')[0] );
                         row.appendChild($('<td>'+data[i][0].range+'</td>')[0]);
                         data[i].map(function(segment) {
-                            row.appendChild($('<td>'+segment.revenue+'</td>')[0]);
+                            row.appendChild($('<td>&pound;'+segment.revenue+'</td>')[0]);
                         })
                     }
 

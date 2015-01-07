@@ -1,12 +1,12 @@
 package lib.aggregations
 
-import com.sksamuel.elastic4s.ElasticDsl.{aggregation, search}
+import com.sksamuel.elastic4s.ElasticDsl._
 import lib.ESClient
 import org.elasticsearch.action.search.SearchResponse
-import org.elasticsearch.search.aggregations.Aggregation
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation
 import org.elasticsearch.search.aggregations.bucket.histogram.{DateHistogram, Histogram => ESHistogram}
 import org.elasticsearch.search.aggregations.metrics.sum.Sum
+import org.joda.time.{DateTime, Duration}
 import play.api.libs.json._
 
 import scala.collection.JavaConverters._
@@ -40,10 +40,38 @@ object Histogram {
     ))
   }
 
+  def subscribers: Future[SearchResponse] = {
+    ESClient.client.execute {
+      search in "events/enriched" query {
+        filteredQuery filter {
+          termFilter("unstruct_event_1.eventSource" -> "subscription")
+        }
+      } aggregations {
+        aggregation datehistogram "byDeviceTime" field "dvce_tstamp" interval DateHistogram.Interval.DAY
+      }
+    }
+  }
+
+  def subscribersByAgeSegment: Future[SearchResponse] = {
+    ESClient.client.execute  {
+      search in "events/enriched" query {
+        filteredQuery filter {
+          termFilter("unstruct_event_1.eventSource" -> "subscription")
+        }
+      } aggregations {
+        aggregation datehistogram "byDeviceTime" field "dvce_tstamp" interval DateHistogram.Interval.WEEK aggs {
+          aggregation range "byAge" field "unstruct_event_1.from.age" ranges (18.0 -> 24, 25.0 -> 34, 35.0 -> 44, 45.0 -> 54, 55.0 -> 64, 64.0 -> 100) aggs {
+            aggregation terms "byGender" field "unstruct_event_1.from.gender" size 2
+          }
+        }
+      }
+    }
+  }
+
   def subscriptionRevenue: Future[SearchResponse] = {
     ESClient.client.execute {
       search in "events/enriched" aggregations {
-        aggregation datehistogram "byDeviceTime" field "dvce_tstamp" interval DateHistogram.Interval.HOUR aggs {
+        aggregation datehistogram "byDeviceTime" field "dvce_tstamp" interval DateHistogram.Interval.DAY aggs {
           aggregation sum "byRevenue" field "unstruct_event_1.financial.eventValue"
         }
       }
@@ -76,8 +104,15 @@ object Histogram {
 
   def eventsBeforeSubscription: Future[SearchResponse] = {
     ESClient.client.execute {
-      search in "events/enriched" aggregations {
-        aggregation datehistogram "bySeconds" field "timesincesubscription" minDocCount 5 interval 10000 aggs {
+      search in "events/enriched" query {
+        filteredQuery filter {
+          and (
+            numericRangeFilter("timesincesubscription") gte -(20*60*60*24),
+            rangeFilter("unstruct_event_1.from.timesinceregistration") lte new Duration(new DateTime("2014-12-01"), DateTime.now).getStandardSeconds.toString
+          )
+        }
+      } aggregations {
+        aggregation datehistogram "bySeconds" field "timesincesubscription" interval 3600 aggs {
           aggregation terms "bySource" field "unstruct_event_1.eventSource" size 1
         }
       }

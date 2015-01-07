@@ -8,6 +8,10 @@ object Dashboard extends Controller {
     Ok(views.html.Dashboard.revenue("Who is most valuable to us?"))
   }
 
+  def subscription = Action {
+    Ok(views.html.Dashboard.subscription("What lead a member to subscribe?"))
+  }
+
   //######################
 
 

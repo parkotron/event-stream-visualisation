@@ -13,7 +13,7 @@ import play.api.libs.json._
 
 object Aggregation extends Controller {
 
-  case class RevenueGenderSegment(gender: String, range: String, revenue: Double) {
+  case class GenderSegmentMetric(gender: String, range: String, revenue: Double) {
     def toJson = {
       JsObject (List(
         "gender" -> JsString(gender),
@@ -23,7 +23,6 @@ object Aggregation extends Controller {
     }
   }
 
-
   def revenue = Action.async {
     Histogram.subscriptionRevenue.map { query =>
       Ok(Histogram.formatHighChartResponse(Histogram.extractResponse[DateHistogram](query, "byDeviceTime", "byRevenue")))
@@ -32,15 +31,39 @@ object Aggregation extends Controller {
 
   def revenueAgeSegment = Action.async {
     Histogram.subscriptionRevenueByAgeSegment.map { query =>
-      val r = query.getAggregations.get[DateHistogram]("byDeviceTime").getBuckets.asScala.toList.lastOption.map { bucket =>
+      val parsed = query.getAggregations.get[DateHistogram]("byDeviceTime").getBuckets.asScala.toList.lastOption.map { bucket =>
         bucket.getAggregations.get[Range]("byAge").getBuckets.asScala.toList.map { ageSegment =>
           ageSegment.getAggregations.get[Terms]("byGender").getBuckets.asScala.toList.map { genderSegment =>
-            RevenueGenderSegment(genderSegment.getKey, ageSegment.getKey, genderSegment.getAggregations.get[Sum]("byRevenue").getValue)
+            GenderSegmentMetric(genderSegment.getKey, ageSegment.getKey, genderSegment.getAggregations.get[Sum]("byRevenue").getValue / 100)
           }
         }
       }.getOrElse(Nil)
 
-      Ok( JsArray(r.map( s => JsArray(s.map(_.toJson)))) )
+      Ok( JsArray(parsed.map( s => JsArray(s.map(_.toJson)))) )
+    }
+  }
+
+  def subscribers = Action.async {
+    Histogram.subscribers.map { query =>
+      val parsed = query.getAggregations.get[DateHistogram]("byDeviceTime").getBuckets.asScala.toList.map { bucket =>
+        bucket.getKeyAsNumber.longValue -> bucket.getDocCount
+      }
+
+      Ok( JsArray(parsed.map( a => JsArray(List(JsNumber(a._1), JsNumber(a._2))) ) ) )
+    }
+  }
+
+  def subscribersAgeSegment = Action.async {
+    Histogram.subscriptionRevenueByAgeSegment.map { query =>
+      val parsed = query.getAggregations.get[DateHistogram]("byDeviceTime").getBuckets.asScala.toList.lastOption.map { bucket =>
+        bucket.getAggregations.get[Range]("byAge").getBuckets.asScala.toList.map { ageSegment =>
+          ageSegment.getAggregations.get[Terms]("byGender").getBuckets.asScala.toList.map { genderSegment =>
+            GenderSegmentMetric(genderSegment.getKey, ageSegment.getKey, genderSegment.getDocCount)
+          }
+        }
+      }.getOrElse(Nil)
+
+      Ok( JsArray(parsed.map( s => JsArray(s.map(_.toJson)))) )
     }
   }
 

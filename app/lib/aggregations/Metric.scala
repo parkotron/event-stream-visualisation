@@ -4,9 +4,11 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import lib.ESClient
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogram.Interval
+import org.elasticsearch.search.aggregations.metrics.stats.Stats
 import org.elasticsearch.search.aggregations.metrics.sum.Sum
+import org.elasticsearch.search.aggregations.metrics.avg.Avg
 import play.api.libs.json.{JsNumber, JsObject}
-import org.joda.time.DateTime
+import org.joda.time.{Duration, DateTime}
 
 import scala.concurrent.Future
 
@@ -15,6 +17,18 @@ object Metric {
   def parseSum(query: SearchResponse, outerAddId: String) = {
     JsObject(List(
       "data" -> JsNumber(query.getAggregations.get[Sum](outerAddId).getValue / 100)
+    ))
+  }
+
+  def parseAverage(query: SearchResponse, outerAddId: String) = {
+    JsObject(List(
+      "data" -> JsNumber(query.getAggregations.get[Avg](outerAddId).getValue.round)
+    ))
+  }
+
+  def parseStats(query: SearchResponse, outerAddId: String) = {
+    JsObject(List(
+      "data" -> JsNumber(0)
     ))
   }
 
@@ -43,6 +57,23 @@ object Metric {
         aggregation datehistogram "byDeviceTime" field "dvce_tstamp" interval defined_interval aggs {
           aggregation sum "byRevenue" field "unstruct_event_1.financial.eventValue"
         }
+      }
+    }
+  }
+
+  def averageTimeFromRegistrationToSubscription: Future[SearchResponse] = {
+    println(new Duration(new DateTime("2014-12-01"), DateTime.now).getStandardSeconds.toString)
+
+    ESClient.client.execute {
+      search in "events/enriched" query {
+        filteredQuery filter {
+          and (
+            termFilter("unstruct_event_1.eventSource", "subscription"),
+            rangeFilter("unstruct_event_1.from.timesinceregistration") lte new Duration(new DateTime("2014-12-01"), DateTime.now).getStandardSeconds.toString
+          )
+        }
+      } aggregations {
+        aggregation avg "byTimeToSubscribe" field "unstruct_event_1.from.timesinceregistration"
       }
     }
   }

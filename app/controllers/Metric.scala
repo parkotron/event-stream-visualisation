@@ -44,4 +44,10 @@ object Metric {
       }.getOrElse(NotFound)
     }
   }
+
+  def avgTimeToSubscribe = Action.async {
+    lib.aggregations.Metric.averageTimeFromRegistrationToSubscription.map { query =>
+      Ok(lib.aggregations.Metric.parseAverage(query, "byTimeToSubscribe"))
+    }
+  }
 }
