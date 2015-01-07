@@ -7,7 +7,7 @@
     <div class="row">
         <div class="col-md-2">
             <dl>
-                <dd><h2><small>Revenue</small></h2></dd>
+                <dd><h2 class="top-none"><small>Revenue</small></h2></dd>
                 <dt><h3 id="revenueMetric"></h3></dt>
 
                 <dd><h2><small>WoW</small></h2></dd>
@@ -17,12 +17,12 @@
                 <dt><h3 id="revenueMoM"></h3></dt>
             </dl>
         </div>
-        <div class="col-md-10">
+        <div class="col-md-10 top-spaced">
             <div id="revenueHistogram" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
         </div>
     </div>
 
-    <div class="row spaced">
+    <div class="row top-spaced">
         <div class="col-md-8">
             <table class="table table-striped table-hover">
                 <thead>
@@ -118,17 +118,10 @@
                     var colors = Highcharts.getOptions().colors;
                     var fragment = document.createDocumentFragment();
 
-                    var parsedData = data.map(function(row, idx) {
-                        return {
-                            name: row[0].range,
-                            y: row[0].revenue + row[1].revenue,
-                            color: colors[idx]
-                        }
-                    })
-
                     var splitData = [];
 
-                    data.map(function(row, idx) {
+                    var parsedData = data.map(function(row, idx) {
+
                         row.map(function(cell){
                             splitData.push({
                                 name: (cell.gender === "man" ? "Men" : "Women"),
@@ -136,6 +129,12 @@
                                 color: colors[idx]
                             })
                         })
+
+                        return {
+                            name: row[0].range,
+                            y: row[0].revenue + row[1].revenue,
+                            color: colors[idx]
+                        }
                     })
 
                     for(var i = 0, l = data.length; i < l; i++) {
@@ -157,13 +156,6 @@
 
                         title: {
                             text: ""
-                        },
-
-                        plotOptions: {
-                            pie: {
-                                shadow: false,
-                                center: ['50%', '50%']
-                            }
                         },
 
                         series: [{

@@ -4,8 +4,8 @@ import play.api.mvc._
 
 object Dashboard extends Controller {
 
-  def subscription = Action {
-    Ok(views.html.Dashboard.subscription("Who is most valuable to us?"))
+  def revenue = Action {
+    Ok(views.html.Dashboard.revenue("Who is most valuable to us?"))
   }
 
   //######################

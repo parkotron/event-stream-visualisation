@@ -1,4 +1,4 @@
-GET         /subscription                   controllers.Dashboard.subscription
+GET         /revenue                        controllers.Dashboard.revenue
 GET         /s                              controllers.Dashboard.scatter
 GET         /h                              controllers.Dashboard.histogram
 GET         /p                              controllers.Dashboard.presub

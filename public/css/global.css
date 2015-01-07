@@ -1,3 +1,11 @@
-.row.spaced {
+.top-none {
+    margin-top: 0;
+}
+
+.top-spaced {
+    margin-top: 20px;
+}
+
+.row.top-spaced {
     margin-top: 40px;
 }
