@@ -5,7 +5,7 @@
     <h1 class="page-header">@title</h1>
 
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-2">
             <dl>
                 <dd><h2><small>Revenue</small></h2></dd>
                 <dt><h3 id="revenueMetric"></h3></dt>
@@ -17,7 +17,7 @@
                 <dt><h3 id="revenueMoM"></h3></dt>
             </dl>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-10">
             <div id="revenueHistogram" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
         </div>
     </div>
@@ -182,7 +182,7 @@
                             innerSize: '75%',
                             dataLabels: {
                                 formatter: function () {
-                                    return this.y > 1 ? '<b>' + this.point.name + ':</b> ' + this.y : null;
+                                    return this.y > 1 ? '<b>' + this.point.name + '</b> ' : null;
                                 },
                                 distance: 10
                             }
