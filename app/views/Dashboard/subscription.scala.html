@@ -22,8 +22,22 @@
         </div>
     </div>
 
-    <div class="row">
-
+    <div class="row spaced">
+        <div class="col-md-8">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Age Demographic</th>
+                        <th>Male</th>
+                        <th>Female</th>
+                    </tr>
+                </thead>
+                <tbody id="revenueDemographicsTable"></tbody>
+            </table>
+        </div>
+        <div class="col-md-4">
+            <div id="revenueDemographicsPie"></div>
+        </div>
     </div>
 
     <script>
@@ -91,6 +105,90 @@
                     }
 
                     $('#revenueMoM').html(num + "%");
+                })
+            });
+        })();
+
+        (function() {
+            var endpoint = '/revenue/demographics';
+            $(function () {
+                $.when(
+                    ESA.Utils.jsonGet(endpoint, "")
+                ).then(function(data) {
+                    var colors = Highcharts.getOptions().colors;
+                    var fragment = document.createDocumentFragment();
+
+                    var parsedData = data.map(function(row, idx) {
+                        return {
+                            name: row[0].range,
+                            y: row[0].revenue + row[1].revenue,
+                            color: colors[idx]
+                        }
+                    })
+
+                    var splitData = [];
+
+                    data.map(function(row, idx) {
+                        row.map(function(cell){
+                            splitData.push({
+                                name: (cell.gender === "man" ? "Men" : "Women"),
+                                y: cell.revenue,
+                                color: colors[idx]
+                            })
+                        })
+                    })
+
+                    for(var i = 0, l = data.length; i < l; i++) {
+                        var row = fragment.appendChild( $('<tr/>')[0] );
+                        row.appendChild($('<td>'+data[i][0].range+'</td>')[0]);
+                        data[i].map(function(segment) {
+                            row.appendChild($('<td>'+segment.revenue+'</td>')[0]);
+                        })
+                    }
+
+                    $('#revenueDemographicsTable')[0].appendChild(fragment.cloneNode(true));
+
+
+                    $('#revenueDemographicsPie').highcharts({
+                        chart: {
+                            type: 'pie',
+                            height: 300
+                        },
+
+                        title: {
+                            text: ""
+                        },
+
+                        plotOptions: {
+                            pie: {
+                                shadow: false,
+                                center: ['50%', '50%']
+                            }
+                        },
+
+                        series: [{
+                            data: parsedData,
+                            size: '75%',
+                            dataLabels: {
+                                formatter: function () {
+                                    return this.y > 5 ? this.point.name : null;
+                                },
+                                color: 'white',
+                                distance: -40
+                            }
+                        }, {
+                            data: splitData,
+                            size: '90%',
+                            innerSize: '75%',
+                            dataLabels: {
+                                formatter: function () {
+                                    return this.y > 1 ? '<b>' + this.point.name + ':</b> ' + this.y : null;
+                                },
+                                distance: 10
+                            }
+                        }]
+                    });
+
                 })
             });
         })();
