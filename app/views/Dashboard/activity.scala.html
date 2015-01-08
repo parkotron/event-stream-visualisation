@@ -1,0 +1,160 @@
+@(title: String)
+
+@main(title = title) {
+
+<h1 class="page-header">@title</h1>
+
+<div class="row top-spaced">
+    <div class="col-md-2">
+        <dl>
+            <dd><h2 class="top-none"><small>Engagement</small></h2></dd>
+            <dt><h3 id="engagementTimeMetric"></h3></dt>
+        </dl>
+    </div>
+    <div class="col-md-10 top-spaced">
+        <div id="subscriptionEventsTail"></div>
+    </div>
+</div>
+
+<div class="row top-spaced">
+    <div class="col-md-8">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr id="activityDemographicsTableHeader">
+                    <th>Age Demographic</th>
+                </tr>
+
+                <tr id="activityDemographicsTableGendersHeader">
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="activityDemographicsTable"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+        (function() {
+            $(function () {
+                $.when(
+                    ESA.Utils.jsonGet("/a/presub/", "profile.views+search+favourites+fans")
+                ).then(function(series) {
+                    $('#subscriptionEventsTail').highcharts({
+                        chart: {
+                            type: 'line'
+                        },
+
+                        title: {
+                            text: "Events prior to subscription"
+                        },
+
+                        navigator : {
+                            enabled : false
+                        },
+
+                        yAxis: {
+                            min: 0
+                        },
+
+                        xAxis: {
+                            labels: {
+                                formatter: function() {
+                                    return Math.round((this.value / (60*60*24))) + " days"
+                                }
+                            }
+                        },
+
+                        series : series
+                    });
+                })
+            });
+        })();
+
+        (function() {
+            var endpoint = '/activity/demographics';
+            $(function () {
+                $.when(
+                    ESA.Utils.jsonGet(endpoint, "")
+                ).then(function(data) {
+                    var colors = Highcharts.getOptions().colors;
+                    var fragment = document.createDocumentFragment();
+
+                    var eventNames = data[data.length-1].map(function(row, idx) {
+                        return _.flatten(row.map(function(segment){
+                            return Object.keys(segment)
+                        }))
+                    })
+
+                    var uniqueEventNames = _.uniq(_.flatten(eventNames));
+
+
+                    uniqueEventNames.map(function(name) {
+                        $('#activityDemographicsTableHeader').append('<th colspan="2">'+name+'</th>');
+                        $('#activityDemographicsTableGendersHeader').append('<th><small>Male</small></th><th><small>Female</small></th>')
+                    })
+
+                    data[data.length-1].map(function(age) {
+                        var rowData = fragment.appendChild( $('<tr />')[0] );
+                        var ageData = rowData.appendChild( $('<td> /')[0] );
+                        age.map(function(source) {
+                            uniqueEventNames.map(function(name) {
+                                if (source.hasOwnProperty(name)) {
+                                    var range = source[name].metric.hasOwnProperty("man") ? source[name].metric.man.range : source[name].metric.woman.range
+
+                                    ageData.innerHTML = range.replace(/\.0/g, '');
+                                    var man = source[name].metric.hasOwnProperty("man") ? source[name].metric.man.revenue : "0"
+                                    var woman = source[name].metric.hasOwnProperty("woman") ? source[name].metric.woman.revenue : "0"
+                                    
+                                    rowData.appendChild($('<td>'+man+'</td>')[0]);
+                                    rowData.appendChild($('<td>'+woman+'</td>')[0]);
+                                }
+                            })  
+                        }) 
+                    })
+
+                    $('#activityDemographicsTable')[0].appendChild(fragment.cloneNode(true));
+
+                    /*
+                    var splitData = [];
+
+                    var parsedData = data[data.length-1].map(function(row, idx) {
+
+                        for (var i in row) {
+                            if (row.hasOwnProperty(i)) {
+                                splitData.push({
+                                    name: (i === "man" ? "Men" : "Women"),
+                                    y: row[i].revenue,
+                                    color: colors[idx]
+                                })
+                            }
+                        }
+
+                        return {
+                            name: row["man"].range,
+                            y: row["man"].revenue + row["woman"].revenue,
+                            color: colors[idx]
+                        }
+                    })
+
+                    var tableData = data[data.length-1];
+
+                    tableData.map(function(row, idx) {
+                        var rowData = fragment.appendChild( $('<tr>')[0] );
+                        rowData.appendChild($('<td>'+row['man'].range.replace(/\.0/g, '')+'</td>')[0]);
+                        var maleData = rowData.appendChild( $('<td>')[0] );
+                        var femaleData = rowData.appendChild( $('<td>')[0] );
+
+                        var maleWoW = ESA.Utils.formatWoW(row['man'].revenue, data[data.length-2][idx]['man'].revenue);
+                        var femaleWoW = ESA.Utils.formatWoW(row['woman'].revenue, data[data.length-2][idx]['woman'].revenue);
+
+                        maleData.appendChild($('<td>'+row['man'].revenue+' <small>'+maleWoW+'</small></td>')[0]);
+                        femaleData.appendChild($('<td>'+row['woman'].revenue+' <small>'+femaleWoW+'</small></td>')[0]);
+                    })
+
+                    $('#activityDemographicsTable')[0].appendChild(fragment.cloneNode(true));
+                    */
+                })
+            });
+        })();
+    </script>
+}

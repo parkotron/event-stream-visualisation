@@ -118,4 +118,19 @@ object Histogram {
       }
     }
   }
+
+  def interactionsByAgeSegment: Future[SearchResponse] = {
+    ESClient.client.execute  {
+      search in "events/enriched" aggregations {
+        aggregation datehistogram "byDeviceTime" field "dvce_tstamp" interval DateHistogram.Interval.WEEK aggs {
+          aggregation range "byAge" field "unstruct_event_1.from.age" ranges (18.0 -> 24, 25.0 -> 34, 35.0 -> 44, 45.0 -> 54, 55.0 -> 64, 64.0 -> 100) aggs {
+            aggregation terms "bySource" field "unstruct_event_1.eventSource" aggs {
+              aggregation terms "byGender" field "unstruct_event_1.from.gender"
+            }
+          }
+        }
+      }
+    }
+  }
+
 }

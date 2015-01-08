@@ -1,5 +1,7 @@
 GET         /revenue                        controllers.Dashboard.revenue
 GET         /subscription                   controllers.Dashboard.subscription
+GET         /activity                       controllers.Dashboard.activity
+
 GET         /s                              controllers.Dashboard.scatter
 GET         /h                              controllers.Dashboard.histogram
 GET         /p                              controllers.Dashboard.presub
@@ -19,5 +21,7 @@ GET         /revenue/demographics           controllers.Aggregation.revenueAgeSe
 GET         /subscription/timeToSubscribe   controllers.Metric.avgTimeToSubscribe
 GET         /subscription/subscribers       controllers.Aggregation.subscribers
 GET         /subscription/demographics      controllers.Aggregation.subscribersAgeSegment
+
+GET         /activity/demographics          controllers.Aggregation.interactionsAgeSegment
 
 GET         /assets/*file                   controllers.Assets.at(path="/public", file)

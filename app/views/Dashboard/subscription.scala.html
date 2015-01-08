@@ -4,12 +4,6 @@
 
 <h1 class="page-header">@title</h1>
 
-<div class="row">
-    <div class="col-md-12">
-        <div id="subscriptionNumbers"></div>
-    </div>
-</div>
-
 <div class="row top-spaced">
     <div class="col-md-2">
         <dl>
@@ -18,7 +12,7 @@
         </dl>
     </div>
     <div class="col-md-10 top-spaced">
-        <div id="subscriptionEventsTail"></div>
+        <div id="subscriptionNumbers"></div>
     </div>
 </div>
 
@@ -48,7 +42,7 @@
                 ).then(function(series) {
                     $('#subscriptionNumbers').highcharts('StockChart', {
                         chart: {
-                            height: 200
+                            height: 300
                         },
 
                         navigator: {

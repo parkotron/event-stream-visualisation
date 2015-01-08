@@ -23,6 +23,15 @@ object Aggregation extends Controller {
     }
   }
 
+  case class SourceSegmentedGenderMetric(source: String, metric: List[GenderSegmentMetric]) {
+    def toJson = {
+      JsObject (List(
+        "source" -> JsString(source),
+        "metric" -> JsObject(metric.map( m => m.gender -> m.toJson))
+      ))
+    }
+  }
+
   def revenue = Action.async {
     Histogram.subscriptionRevenue.map { query =>
       Ok(Histogram.formatHighChartResponse(Histogram.extractResponse[DateHistogram](query, "byDeviceTime", "byRevenue")))
@@ -70,6 +79,31 @@ object Aggregation extends Controller {
       Ok( JsArray(parsed.map { list =>
         JsArray(list.map { inner =>
           JsObject(inner.map( segment => segment.gender -> segment.toJson ))
+        })
+      }))
+    }
+  }
+
+  def interactionsAgeSegment = Action.async {
+    Histogram.interactionsByAgeSegment.map { query =>
+      val parsed = query.getAggregations.get[DateHistogram]("byDeviceTime").getBuckets.asScala.toList.map { bucket =>
+        bucket.getAggregations.get[Range]("byAge").getBuckets.asScala.toList.map { ageSegment =>
+          ageSegment.getAggregations.get[Terms]("bySource").getBuckets.asScala.toList.map { sourceSegment =>
+            SourceSegmentedGenderMetric(
+              sourceSegment.getKey,
+              sourceSegment.getAggregations.get[Terms]("byGender").getBuckets.asScala.toList.map { genderSegment =>
+                GenderSegmentMetric(genderSegment.getKey, ageSegment.getKey, genderSegment.getDocCount)
+              }
+            )
+          }
+        }
+      }
+
+      Ok( JsArray(parsed.map { time =>
+        JsArray(time.map { age =>
+          JsArray(age.map { source =>
+            JsObject(source.source -> source.toJson :: Nil)
+          })
         })
       }))
     }

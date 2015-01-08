@@ -12,6 +12,10 @@ object Dashboard extends Controller {
     Ok(views.html.Dashboard.subscription("Subscriptions"))
   }
 
+  def activity = Action {
+    Ok(views.html.Dashboard.activity("User activity"))
+  }
+
   //######################
 
 
