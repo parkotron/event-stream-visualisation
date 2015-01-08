@@ -9,7 +9,7 @@ object Dashboard extends Controller {
   }
 
   def subscription = Action {
-    Ok(views.html.Dashboard.subscription("What lead a member to subscribe?"))
+    Ok(views.html.Dashboard.subscription("Subscriptions"))
   }
 
   //######################

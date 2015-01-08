@@ -62,8 +62,6 @@ object Metric {
   }
 
   def averageTimeFromRegistrationToSubscription: Future[SearchResponse] = {
-    println(new Duration(new DateTime("2014-12-01"), DateTime.now).getStandardSeconds.toString)
-
     ESClient.client.execute {
       search in "events/enriched" query {
         filteredQuery filter {

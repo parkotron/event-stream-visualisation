@@ -10,6 +10,9 @@
                 <dd><h2 class="top-none"><small>Revenue to date</small></h2></dd>
                 <dt><h3 id="revenueMetric"></h3></dt>
 
+                <dd><h2 class="top-none"><small>Revenue this period</small></h2></dd>
+                <dt><h3 id="revenuePeriodMetric"></h3></dt>
+
                 <dd><h2><small>WoW</small></h2></dd>
                 <dt><h3 id="revenueWoW"></h3></dt>
 
@@ -40,7 +43,81 @@
         </div>
     </div>
 
-    <script>
+    <div class="row top-spaced">
+        <div class="col-md-12">
+            <div id="revenueLocation"></div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        (function() {
+            $(function () {
+                var chart = new Highcharts.Map({
+                    chart: {
+                        renderTo: $('#revenueLocation')[0]
+                    },
+
+                    legend: {
+                        enabled: false
+                    },
+
+                    series : [{
+            // Use the gb-all map with no data as a basemap
+            mapData: Highcharts.maps['custom/gb-all-ireland'],
+            name: 'Basemap',
+            borderColor: Highcharts.getOptions().colors[0],
+            nullColor: '#fff',
+        }, {
+                        type: 'mappoint',
+                        name: 'Cities',
+                        color: Highcharts.getOptions().colors[1],
+                        data: [{
+                            name: 'London',
+                            lat: 51.507222,
+                            lon: -0.1275
+                        }, {
+                            name: 'Birmingham',
+                            lat: 52.483056,
+                            lon: -1.893611
+                        }, {
+                            name: 'Leeds',
+                            lat: 53.799722,
+                            lon: -1.549167
+                        }, {
+                            name: 'Glasgow',
+                            lat: 55.858,
+                            lon: -4.259
+                        }, {
+                            name: 'Sheffield',
+                            lat: 53.383611,
+                            lon: -1.466944
+                        }, {
+                            name: 'Liverpool',
+                            lat: 53.4,
+                            lon: -3
+                        }, {
+                            name: 'Bristol',
+                            lat: 51.45,
+                            lon: -2.583333
+                        }, {
+                            name: 'Belfast',
+                            lat: 54.597,
+                            lon: -5.93
+                        }, {
+                            name: 'Lerwick',
+                            lat: 60.155,
+                            lon: -1.145,
+                            dataLabels: {
+                                align: 'left',
+                                x: 5,
+                                verticalAlign: 'middle'
+                            }
+                        }]
+                    }]
+                });
+            });
+        })();
+
         (function() {
             var endpoint = '/revenue/histogram';
             $(function () {
@@ -64,7 +141,22 @@
                             min: 0
                         },
 
-                        series : [data]
+                        series : [{
+                            type : 'area',
+                            data: data.data,
+                            fillColor : {
+                                linearGradient : {
+                                    x1: 0,
+                                    y1: 0,
+                                    x2: 0,
+                                    y2: 1
+                                },
+                                stops : [
+                                    [0, Highcharts.getOptions().colors[0]],
+                                    [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0.1).get('rgba')]
+                                ]
+                            }
+                        }]
                     });
                 })
             });
@@ -124,30 +216,47 @@
 
                     var splitData = [];
 
-                    var parsedData = data.map(function(row, idx) {
+                    var parsedData = data[data.length-1].map(function(row, idx) {
 
-                        row.map(function(cell){
-                            splitData.push({
-                                name: (cell.gender === "man" ? "Men" : "Women"),
-                                y: cell.revenue,
-                                color: colors[idx]
-                            })
-                        })
+                        for (var i in row) {
+                            if (row.hasOwnProperty(i)) {
+                                splitData.push({
+                                    name: (i === "man" ? "Men" : "Women"),
+                                    y: row[i].revenue,
+                                    color: colors[idx]
+                                })
+                            }
+                        }
 
                         return {
-                            name: row[0].range,
-                            y: row[0].revenue + row[1].revenue,
+                            name: row["man"].range,
+                            y: row["man"].revenue + row["woman"].revenue,
                             color: colors[idx]
                         }
                     })
 
-                    for(var i = 0, l = data.length; i < l; i++) {
-                        var row = fragment.appendChild( $('<tr/>')[0] );
-                        row.appendChild($('<td>'+data[i][0].range+'</td>')[0]);
-                        data[i].map(function(segment) {
-                            row.appendChild($('<td>&pound;'+segment.revenue+'</td>')[0]);
-                        })
-                    }
+                    var periodRevenue = 0;
+
+                    parsedData.map(function(item) {
+                        periodRevenue += item.y;
+                    })
+
+                    $('#revenuePeriodMetric').html('&pound;'+periodRevenue);
+
+                    var tableData = data[data.length-1];
+
+                    tableData.map(function(row, idx) {
+                        var rowData = fragment.appendChild( $('<tr>')[0] );
+                        rowData.appendChild($('<td>'+row['man'].range.replace(/\.0/g, '')+'</td>')[0]);
+                        var maleData = rowData.appendChild( $('<td>')[0] );
+                        var femaleData = rowData.appendChild( $('<td>')[0] );
+
+                        var maleWoW = ESA.Utils.formatWoW(row['man'].revenue, data[data.length-2][idx]['man'].revenue);
+                        var femaleWoW = ESA.Utils.formatWoW(row['woman'].revenue, data[data.length-2][idx]['woman'].revenue);
+
+                        maleData.appendChild($('<td>&pound;'+row['man'].revenue+' <small>'+maleWoW+'</small></td>')[0]);
+                        femaleData.appendChild($('<td>&pound;'+row['woman'].revenue+' <small>'+femaleWoW+'</small></td>')[0]);
+                    })
 
                     $('#revenueDemographicsTable')[0].appendChild(fragment.cloneNode(true));
 

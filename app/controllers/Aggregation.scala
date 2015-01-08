@@ -31,15 +31,19 @@ object Aggregation extends Controller {
 
   def revenueAgeSegment = Action.async {
     Histogram.subscriptionRevenueByAgeSegment.map { query =>
-      val parsed = query.getAggregations.get[DateHistogram]("byDeviceTime").getBuckets.asScala.toList.lastOption.map { bucket =>
+      val parsed = query.getAggregations.get[DateHistogram]("byDeviceTime").getBuckets.asScala.toList.map { bucket =>
         bucket.getAggregations.get[Range]("byAge").getBuckets.asScala.toList.map { ageSegment =>
           ageSegment.getAggregations.get[Terms]("byGender").getBuckets.asScala.toList.map { genderSegment =>
             GenderSegmentMetric(genderSegment.getKey, ageSegment.getKey, genderSegment.getAggregations.get[Sum]("byRevenue").getValue / 100)
           }
         }
-      }.getOrElse(Nil)
+      }
 
-      Ok( JsArray(parsed.map( s => JsArray(s.map(_.toJson)))) )
+      Ok( JsArray(parsed.map { list =>
+        JsArray(list.map { inner =>
+          JsObject(inner.map( segment => segment.gender -> segment.toJson ))
+        })
+      }))
     }
   }
 
@@ -55,15 +59,19 @@ object Aggregation extends Controller {
 
   def subscribersAgeSegment = Action.async {
     Histogram.subscriptionRevenueByAgeSegment.map { query =>
-      val parsed = query.getAggregations.get[DateHistogram]("byDeviceTime").getBuckets.asScala.toList.lastOption.map { bucket =>
+      val parsed = query.getAggregations.get[DateHistogram]("byDeviceTime").getBuckets.asScala.toList.map { bucket =>
         bucket.getAggregations.get[Range]("byAge").getBuckets.asScala.toList.map { ageSegment =>
           ageSegment.getAggregations.get[Terms]("byGender").getBuckets.asScala.toList.map { genderSegment =>
             GenderSegmentMetric(genderSegment.getKey, ageSegment.getKey, genderSegment.getDocCount)
           }
         }
-      }.getOrElse(Nil)
+      }
 
-      Ok( JsArray(parsed.map( s => JsArray(s.map(_.toJson)))) )
+      Ok( JsArray(parsed.map { list =>
+        JsArray(list.map { inner =>
+          JsObject(inner.map( segment => segment.gender -> segment.toJson ))
+        })
+      }))
     }
   }
 

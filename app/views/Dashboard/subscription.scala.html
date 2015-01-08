@@ -79,7 +79,7 @@
                                 },
                                 stops : [
                                     [0, Highcharts.getOptions().colors[0]],
-                                    [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                                    [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0.1).get('rgba')]
                                 ]
                             }
                         }]
@@ -147,30 +147,39 @@
 
                     var splitData = [];
 
-                    var parsedData = data.map(function(row, idx) {
+                    var parsedData = data[data.length-1].map(function(row, idx) {
 
-                        row.map(function(cell){
-                            splitData.push({
-                                name: (cell.gender === "man" ? "Men" : "Women"),
-                                y: cell.revenue,
-                                color: colors[idx]
-                            })
-                        })
+                        for (var i in row) {
+                            if (row.hasOwnProperty(i)) {
+                                splitData.push({
+                                    name: (i === "man" ? "Men" : "Women"),
+                                    y: row[i].revenue,
+                                    color: colors[idx]
+                                })
+                            }
+                        }
 
                         return {
-                            name: row[0].range,
-                            y: row[0].revenue + row[1].revenue,
+                            name: row["man"].range,
+                            y: row["man"].revenue + row["woman"].revenue,
                             color: colors[idx]
                         }
                     })
 
-                    for(var i = 0, l = data.length; i < l; i++) {
-                        var row = fragment.appendChild( $('<tr/>')[0] );
-                        row.appendChild($('<td>'+data[i][0].range+'</td>')[0]);
-                        data[i].map(function(segment) {
-                            row.appendChild($('<td>'+segment.revenue+'</td>')[0]);
-                        })
-                    }
+                    var tableData = data[data.length-1];
+
+                    tableData.map(function(row, idx) {
+                        var rowData = fragment.appendChild( $('<tr>')[0] );
+                        rowData.appendChild($('<td>'+row['man'].range.replace(/\.0/g, '')+'</td>')[0]);
+                        var maleData = rowData.appendChild( $('<td>')[0] );
+                        var femaleData = rowData.appendChild( $('<td>')[0] );
+
+                        var maleWoW = ESA.Utils.formatWoW(row['man'].revenue, data[data.length-2][idx]['man'].revenue);
+                        var femaleWoW = ESA.Utils.formatWoW(row['woman'].revenue, data[data.length-2][idx]['woman'].revenue);
+
+                        maleData.appendChild($('<td>'+row['man'].revenue+' <small>'+maleWoW+'</small></td>')[0]);
+                        femaleData.appendChild($('<td>'+row['woman'].revenue+' <small>'+femaleWoW+'</small></td>')[0]);
+                    })
 
                     $('#subscriptionDemographicsTable')[0].appendChild(fragment.cloneNode(true));
 
