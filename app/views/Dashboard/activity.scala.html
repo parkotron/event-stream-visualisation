@@ -91,68 +91,38 @@
                     uniqueEventNames.map(function(name) {
                         $('#activityDemographicsTableHeader').append('<th colspan="2">'+name+'</th>');
                         $('#activityDemographicsTableGendersHeader').append('<th><small>Male</small></th><th><small>Female</small></th>')
+                    })          
+
+                    data[data.length-1].map(function(ageRanges, idx) {
+                        var rowData = fragment.appendChild( $('<tr />')[0] );
+                        var ageData = rowData.appendChild( $('<td id="age-cell-'+idx+'"> /')[0] );
+
+                        uniqueEventNames.map(function(name) {
+                            var manCell = rowData.appendChild($('<td id="man-cell-'+name.replace('.', '')+'-'+idx+'" />')[0]);
+                            var womanCell = rowData.appendChild($('<td id="woman-cell-'+name.replace('.', '')+'-'+idx+'" />')[0]);
+                        })
                     })
 
-                    data[data.length-1].map(function(age) {
-                        var rowData = fragment.appendChild( $('<tr />')[0] );
-                        var ageData = rowData.appendChild( $('<td> /')[0] );
-                        age.map(function(source) {
+                    $('#activityDemographicsTable')[0].appendChild(fragment.cloneNode(true));
+                    data[data.length-1].map(function(ageRanges, idx) {
+                        ageRanges.map(function(source) {
                             uniqueEventNames.map(function(name) {
                                 if (source.hasOwnProperty(name)) {
+
                                     var range = source[name].metric.hasOwnProperty("man") ? source[name].metric.man.range : source[name].metric.woman.range
 
-                                    ageData.innerHTML = range.replace(/\.0/g, '');
+                                    $('#age-cell-'+idx).text(range.replace(/\.0/g, ''));
                                     var man = source[name].metric.hasOwnProperty("man") ? source[name].metric.man.revenue : "0"
                                     var woman = source[name].metric.hasOwnProperty("woman") ? source[name].metric.woman.revenue : "0"
-                                    
-                                    rowData.appendChild($('<td>'+man+'</td>')[0]);
-                                    rowData.appendChild($('<td>'+woman+'</td>')[0]);
+
+                                    $('#man-cell-'+name.replace('.', '')+'-'+idx).text(man);
+                                    $('#woman-cell-'+name.replace('.', '')+'-'+idx).text(woman);
                                 }
                             })  
                         }) 
                     })
 
-                    $('#activityDemographicsTable')[0].appendChild(fragment.cloneNode(true));
-
-                    /*
-                    var splitData = [];
-
-                    var parsedData = data[data.length-1].map(function(row, idx) {
-
-                        for (var i in row) {
-                            if (row.hasOwnProperty(i)) {
-                                splitData.push({
-                                    name: (i === "man" ? "Men" : "Women"),
-                                    y: row[i].revenue,
-                                    color: colors[idx]
-                                })
-                            }
-                        }
-
-                        return {
-                            name: row["man"].range,
-                            y: row["man"].revenue + row["woman"].revenue,
-                            color: colors[idx]
-                        }
-                    })
-
-                    var tableData = data[data.length-1];
-
-                    tableData.map(function(row, idx) {
-                        var rowData = fragment.appendChild( $('<tr>')[0] );
-                        rowData.appendChild($('<td>'+row['man'].range.replace(/\.0/g, '')+'</td>')[0]);
-                        var maleData = rowData.appendChild( $('<td>')[0] );
-                        var femaleData = rowData.appendChild( $('<td>')[0] );
-
-                        var maleWoW = ESA.Utils.formatWoW(row['man'].revenue, data[data.length-2][idx]['man'].revenue);
-                        var femaleWoW = ESA.Utils.formatWoW(row['woman'].revenue, data[data.length-2][idx]['woman'].revenue);
-
-                        maleData.appendChild($('<td>'+row['man'].revenue+' <small>'+maleWoW+'</small></td>')[0]);
-                        femaleData.appendChild($('<td>'+row['woman'].revenue+' <small>'+femaleWoW+'</small></td>')[0]);
-                    })
-
-                    $('#activityDemographicsTable')[0].appendChild(fragment.cloneNode(true));
-                    */
+                    
                 })
             });
         })();
