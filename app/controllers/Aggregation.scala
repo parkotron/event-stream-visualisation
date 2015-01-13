@@ -31,7 +31,24 @@ object Aggregation extends Controller {
       ))
     }
   }
-
+  case class SourceSegment(
+    profile_views: Option[List[List[(Int,Int)]]],
+    search: String,
+    authentication: String,
+    fans: String,
+    favourites: String,
+    messages: String,
+    hiddenby: String,
+    blocked: String,
+    invoice: String,
+    subscription: String,
+    registration: String,
+    messages_received: String,
+    profile_viewed: String,
+    messages_seen: String,
+    messages_read: String
+  )
+  
   def revenue = Action.async {
     Histogram.subscriptionRevenue.map { query =>
       Ok(Histogram.formatHighChartResponse(Histogram.extractResponse[DateHistogram](query, "byDeviceTime", "byRevenue")))
@@ -106,6 +123,33 @@ object Aggregation extends Controller {
           })
         })
       }))
+    }
+  }
+
+  def interactions(period: String) = Action.async {
+    Histogram.interactionsBySource(period).map { query =>
+      val parsed = query.getAggregations.get[Terms]("bySource").getBuckets.asScala.toList.map { sourceSegment =>
+        (sourceSegment.getKey,
+          sourceSegment.getAggregations.get[DateHistogram]("byDeviceTime").getBuckets.asScala.toList.map { bucket =>
+            (bucket.getKeyAsNumber.longValue, bucket.getDocCount)
+          }
+        )
+      }
+
+      Ok(
+          JsArray(parsed.map{ source =>
+            JsObject(List(
+              "id"   -> JsString(source._1),
+              "name" -> JsString(source._1),
+              "data" -> JsArray(
+                source._2.map{ date =>
+                  JsArray(List(JsNumber(date._1), JsNumber(date._2)))
+                }
+              )
+            ))
+          }
+        )
+      )
     }
   }
 

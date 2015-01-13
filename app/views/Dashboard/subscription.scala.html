@@ -83,42 +83,6 @@
         })();
 
         (function() {
-            $(function () {
-                $.when(
-                    ESA.Utils.jsonGet("/a/presub/", "profile.views+search+favourites+fans")
-                ).then(function(series) {
-                    $('#subscriptionEventsTail').highcharts({
-                        chart: {
-                            type: 'line'
-                        },
-
-                        title: {
-                            text: "Events prior to subscription"
-                        },
-
-                        navigator : {
-                            enabled : false
-                        },
-
-                        yAxis: {
-                            min: 0
-                        },
-
-                        xAxis: {
-                            labels: {
-                                formatter: function() {
-                                    return Math.round((this.value / (60*60*24))) + " days"
-                                }
-                            }
-                        },
-
-                        series : series
-                    });
-                })
-            });
-        })();
-
-        (function() {
             var endpoint = '/subscription/timeToSubscribe';
             $(function () {
                 $.when(

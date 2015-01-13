@@ -9,3 +9,9 @@
 .row.top-spaced {
     margin-top: 40px;
 }
+
+.navbar-brand {
+    font-family: 'Playball', cursive;
+    font-size: 3rem;
+    text-shadow: 1px 1px 1px rgba(255, 255, 255, 1);
+}

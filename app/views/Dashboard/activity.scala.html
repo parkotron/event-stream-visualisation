@@ -17,6 +17,12 @@
 </div>
 
 <div class="row top-spaced">
+    <div class="col-md-10 top-spaced">
+        <div id="interactionsEvents"></div>
+    </div>
+</div>
+
+<div class="row top-spaced">
     <div class="col-md-8">
         <table class="table table-striped table-hover">
             <thead>
@@ -37,7 +43,7 @@
         (function() {
             $(function () {
                 $.when(
-                    ESA.Utils.jsonGet("/a/presub/", "profile.views+search+favourites+fans")
+                    ESA.Utils.jsonGet("/a/presub/", "profile.views+search+favourites+fans+messages.seen+messages.received+messages.read")
                 ).then(function(series) {
                     $('#subscriptionEventsTail').highcharts({
                         chart: {
@@ -62,6 +68,56 @@
                                     return Math.round((this.value / (60*60*24))) + " days"
                                 }
                             }
+                        },
+
+                        series : series
+                    });
+                })
+            });
+        })();
+
+        (function() {
+            $(function () {
+                $.when(
+                    ESA.Utils.jsonGet("/activity/interactions/10h", "")
+                ).then(function(series) {
+                    $('#interactionsEvents').highcharts({
+                        chart: {
+                            type: 'spline',
+                            events: {
+                                load: function () {
+
+                                    (function(chart) {
+
+                                    setInterval(function () {
+                                        $.when(ESA.Utils.jsonGet("/activity/interactions/30s", "")
+                                        ).then(function(data){
+                                            data.map(function(dataPoint){
+                                                chart.get(dataPoint.id).setData(dataPoint.data)
+                                            })
+
+                                        });
+
+                                    }, 10000);
+                                    })(this);
+                                }
+                            }
+                        },
+
+                        title: {
+                            text: "activity"
+                        },
+
+                        navigator : {
+                            enabled : false
+                        },
+
+                        yAxis: {
+                            min: 0
+                        },
+
+                        xAxis: {
+                            type: "datetime"
                         },
 
                         series : series

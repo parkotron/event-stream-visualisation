@@ -23,5 +23,6 @@ GET         /subscription/subscribers       controllers.Aggregation.subscribers
 GET         /subscription/demographics      controllers.Aggregation.subscribersAgeSegment
 
 GET         /activity/demographics          controllers.Aggregation.interactionsAgeSegment
+GET         /activity/interactions/:period  controllers.Aggregation.interactions(period: String)
 
 GET         /assets/*file                   controllers.Assets.at(path="/public", file)
