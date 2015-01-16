@@ -44,6 +44,19 @@ object Metric {
     }
   }
 
+  def subscriberNumbers(from: String): Future[SearchResponse] = {
+    ESClient.client.execute {
+      search in "events/enriched" query {
+        filteredQuery filter {
+          and (
+            rangeFilter("dvce_tstamp") lte "now" gte from,
+            termFilter("unstruct_event_1.eventSource", "subscription")
+          )
+        }
+      }
+    }
+  }
+
   def intervalComparison(from: String, to: String, defined_interval: Interval): Future[SearchResponse] = {
     ESClient.client.execute {
       search in "events/enriched" query {

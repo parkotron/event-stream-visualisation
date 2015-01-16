@@ -39,7 +39,7 @@ object Aggregation extends Controller {
   }
 
   def revenueAgeSegment = Action.async {
-    Histogram.subscriptionRevenueByAgeSegment.map { query =>
+    Histogram.subscriptionRevenueByAgeSegment().map { query =>
       val parsed = query.getAggregations.get[DateHistogram]("byDeviceTime").getBuckets.asScala.toList.map { bucket =>
         bucket.getAggregations.get[Range]("byAge").getBuckets.asScala.toList.map { ageSegment =>
           ageSegment.getAggregations.get[Terms]("byGender").getBuckets.asScala.toList.map { genderSegment =>
@@ -67,7 +67,7 @@ object Aggregation extends Controller {
   }
 
   def subscribersAgeSegment = Action.async {
-    Histogram.subscriptionRevenueByAgeSegment.map { query =>
+    Histogram.subscriptionRevenueByAgeSegment().map { query =>
       val parsed = query.getAggregations.get[DateHistogram]("byDeviceTime").getBuckets.asScala.toList.map { bucket =>
         bucket.getAggregations.get[Range]("byAge").getBuckets.asScala.toList.map { ageSegment =>
           ageSegment.getAggregations.get[Terms]("byGender").getBuckets.asScala.toList.map { genderSegment =>

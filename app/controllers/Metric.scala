@@ -15,6 +15,12 @@ object Metric {
     }
   }
 
+  def subscribers(from: String) = Action.async {
+    lib.aggregations.Metric.subscriberNumbers(from).map { query =>
+      Ok(JsNumber(query.getHits.totalHits))
+    }
+  }
+
   private def variance(a: Double, b: Double): Long = {
     ((b - a) / a) * 100 round
   }

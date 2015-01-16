@@ -78,10 +78,10 @@ object Histogram {
     }
   }
 
-  def subscriptionRevenueByAgeSegment: Future[SearchResponse] = {
+  def subscriptionRevenueByAgeSegment(timeInterval: DateHistogram.Interval = DateHistogram.Interval.WEEK): Future[SearchResponse] = {
     ESClient.client.execute {
       search in "events/enriched" aggregations {
-        aggregation datehistogram "byDeviceTime" field "dvce_tstamp" interval DateHistogram.Interval.WEEK aggs {
+        aggregation datehistogram "byDeviceTime" field "dvce_tstamp" interval timeInterval aggs {
           aggregation range "byAge" field "unstruct_event_1.from.age" ranges (18.0 -> 24, 25.0 -> 34, 35.0 -> 44, 45.0 -> 54, 55.0 -> 64, 64.0 -> 100) aggs {
             aggregation terms "byGender" field "unstruct_event_1.from.gender" size 2 aggs {
               aggregation sum "byRevenue" field "unstruct_event_1.financial.eventValue"

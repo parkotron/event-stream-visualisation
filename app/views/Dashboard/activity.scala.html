@@ -37,7 +37,7 @@
         (function() {
             $(function () {
                 $.when(
-                    ESA.Utils.jsonGet("/a/presub/", "profile.views+search+favourites+fans")
+                    ESA.Utils.jsonGet("/a/presub/", "profile.views+search+favourites+fans+messages.read+messages.seen+messages.received")
                 ).then(function(series) {
                     $('#subscriptionEventsTail').highcharts({
                         chart: {
