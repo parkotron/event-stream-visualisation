@@ -4,10 +4,6 @@
 <div id="average-container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
 
 <script>
-        var series;
-
-
-
         function jsonGet(callback) {
             return $.getJSON('/q/scatter', function (data) {
                 callback(data);
@@ -15,9 +11,11 @@
         }
 
         $(function () {
+            var series;
+
             Highcharts.setOptions({
-            colors: ['#5481d6', '#d654Af']
-        })
+                colors: ['#5481d6', '#d654Af']
+            })
 
             $.when(
                 jsonGet(function(data) {

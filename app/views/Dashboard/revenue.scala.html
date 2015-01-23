@@ -10,7 +10,7 @@
                 <dd><h2 class="top-none"><small>Revenue to date</small></h2></dd>
                 <dt><h3 id="revenueMetric"></h3></dt>
 
-                <dd><h2 class="top-none"><small>Revenue this period</small></h2></dd>
+                <dd><h2 class="top-none"><small>Revenue last week</small></h2></dd>
                 <dt><h3 id="revenuePeriodMetric"></h3></dt>
 
                 <dd><h2><small>WoW</small></h2></dd>
@@ -43,81 +43,7 @@
         </div>
     </div>
 
-    <div class="row top-spaced">
-        <div class="col-md-12">
-            <div id="revenueLocation"></div>
-        </div>
-    </div>
-
     <script type="text/javascript">
-        (function() {
-            $(function () {
-                var chart = new Highcharts.Map({
-                    chart: {
-                        renderTo: $('#revenueLocation')[0]
-                    },
-
-                    legend: {
-                        enabled: false
-                    },
-
-                    series : [{
-            // Use the gb-all map with no data as a basemap
-            mapData: Highcharts.maps['custom/gb-all-ireland'],
-            name: 'Basemap',
-            borderColor: Highcharts.getOptions().colors[0],
-            nullColor: '#fff',
-        }, {
-                        type: 'mappoint',
-                        name: 'Cities',
-                        color: Highcharts.getOptions().colors[1],
-                        data: [{
-                            name: 'London',
-                            lat: 51.507222,
-                            lon: -0.1275
-                        }, {
-                            name: 'Birmingham',
-                            lat: 52.483056,
-                            lon: -1.893611
-                        }, {
-                            name: 'Leeds',
-                            lat: 53.799722,
-                            lon: -1.549167
-                        }, {
-                            name: 'Glasgow',
-                            lat: 55.858,
-                            lon: -4.259
-                        }, {
-                            name: 'Sheffield',
-                            lat: 53.383611,
-                            lon: -1.466944
-                        }, {
-                            name: 'Liverpool',
-                            lat: 53.4,
-                            lon: -3
-                        }, {
-                            name: 'Bristol',
-                            lat: 51.45,
-                            lon: -2.583333
-                        }, {
-                            name: 'Belfast',
-                            lat: 54.597,
-                            lon: -5.93
-                        }, {
-                            name: 'Lerwick',
-                            lat: 60.155,
-                            lon: -1.145,
-                            dataLabels: {
-                                align: 'left',
-                                x: 5,
-                                verticalAlign: 'middle'
-                            }
-                        }]
-                    }]
-                });
-            });
-        })();
-
         (function() {
             var endpoint = '/revenue/histogram';
             $(function () {
@@ -168,7 +94,7 @@
                 $.when(
                     ESA.Utils.jsonGet(endpoint, "")
                 ).then(function(data) {
-                    $('#revenueMetric').html("&pound;" + data.data);
+                    $('#revenueMetric').html("&pound;" + Math.round(data.data));
                 })
             });
         })();
@@ -241,7 +167,7 @@
                         periodRevenue += item.y;
                     })
 
-                    $('#revenuePeriodMetric').html('&pound;'+periodRevenue);
+                    $('#revenuePeriodMetric').html('&pound;'+Math.round(periodRevenue));
 
                     var tableData = data[data.length-1];
 
