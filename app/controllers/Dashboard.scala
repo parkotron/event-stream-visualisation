@@ -4,34 +4,40 @@ import play.api.mvc._
 
 object Dashboard extends Controller {
 
-  def revenue = Action {
-    Ok(views.html.Dashboard.revenue("Who is most valuable to us?"))
+  def section(request: play.api.mvc.Request[Any]): String = {
+    request.path.split('/').drop(1).take(1).headOption.getOrElse("")
   }
 
-  def subscription = Action {
-    Ok(views.html.Dashboard.subscription("Subscriptions"))
+  def revenue = Action { implicit request =>
+    Ok(views.html.Dashboard.revenue(section(request), "Who is most valuable to us?"))
   }
 
-  def subscriptionDailyKPI = Action {
-    Ok(views.html.Dashboard.subscriptionbyday("Subscription metrics by day"))
+  def subscription = Action { implicit request =>
+    Ok(views.html.Dashboard.subscription(section(request), "Subscriptions"))
   }
 
-  def activity = Action {
-    Ok(views.html.Dashboard.activity("User activity"))
+  def subscriptionDailyKPI = Action { implicit request =>
+    println(section(request))
+
+    Ok(views.html.Dashboard.subscriptionbyday(section(request), "Subscription metrics by day"))
+  }
+
+  def activity = Action { implicit request =>
+    Ok(views.html.Dashboard.activity(section(request), "User activity"))
   }
 
   //######################
 
 
-  def histogram = Action {
+  /*def histogram = Action { implicit request =>
     Ok(views.html.Dashboard.histogram())
   }
 
-  def presub = Action {
+  def presub = Action { implicit request =>
     Ok(views.html.Dashboard.presub())
   }
 
-  def scatter = Action {
+  def scatter = Action { implicit request =>
     Ok(views.html.Dashboard.scatter())
-  }
+  }*/
 }

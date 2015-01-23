@@ -3,9 +3,9 @@ GET         /subscription                           controllers.Dashboard.subscr
 GET         /subscription/daily                     controllers.Dashboard.subscriptionDailyKPI
 GET         /activity                               controllers.Dashboard.activity
 
-GET         /s                                      controllers.Dashboard.scatter
-GET         /h                                      controllers.Dashboard.histogram
-GET         /p                                      controllers.Dashboard.presub
+#GET         /s                                      controllers.Dashboard.scatter
+#GET         /h                                      controllers.Dashboard.histogram
+#GET         /p                                      controllers.Dashboard.presub
 
 
 GET         /a/histogram/:event                     controllers.Aggregation.histogram(event: String)
@@ -25,5 +25,7 @@ GET         /subscription/subscribers/metric/:from  controllers.Metric.subscribe
 GET         /subscription/demographics              controllers.Aggregation.subscribersAgeSegment
 
 GET         /activity/demographics                  controllers.Aggregation.interactionsAgeSegment
+GET         /activity/demographics                  controllers.Aggregation.interactionsAgeSegment
+GET         /activity/interactions/:period          controllers.Aggregation.interactions(period: String)
 
 GET         /assets/*file                           controllers.Assets.at(path="/public", file)

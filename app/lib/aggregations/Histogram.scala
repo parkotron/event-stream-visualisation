@@ -113,7 +113,21 @@ object Histogram {
         }
       } aggregations {
         aggregation datehistogram "bySeconds" field "timesincesubscription" interval 3600 aggs {
-          aggregation terms "bySource" field "unstruct_event_1.eventSource" size 1
+          aggregation terms "bySource" field "unstruct_event_1.eventSource" size 10
+        }
+      }
+    }
+  }
+
+  def interactionsBySource(period: String): Future[SearchResponse] = {
+    ESClient.client.execute  {
+      search in "events/enriched"  query {
+        filteredQuery filter {
+           rangeFilter("dvce_tstamp") gte s"now-$period"
+        }
+      } aggregations {
+        aggregation terms "bySource" field "unstruct_event_1.eventSource" minDocCount 0 aggs {
+          aggregation datehistogram "byDeviceTime" field "dvce_tstamp" minDocCount 0 interval DateHistogram.Interval.seconds(10)
         }
       }
     }
